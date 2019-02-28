@@ -5,8 +5,8 @@ from pyppeteer import launch
 import sys
 
 async def get_browser():
-    # return await launch({"headless": False})
-    return await launch()
+    return await launch({"headless": False})
+    # return await launch()
 
 async def get_page(browser, url):
     page = await browser.newPage()
@@ -22,10 +22,10 @@ async def readPage(page):
     # this currently only gets 1 page 
     pageResults = await page.evaluate(
         '''() => {
-        var temp = document.querySelectorAll('.dataset-content')
-        var dataset = []
+        var searchResults = document.querySelectorAll('.dataset-content')
+        var datasets = []
         var numExcessResources = 0
-        for (item of temp) {
+        for (item of searchResults) {
             organization = item.querySelector('.organization-type')
                                 .querySelector('span')
                                 .textContent
@@ -48,9 +48,9 @@ async def readPage(page):
                 dataFormats = dataFormats.slice(0,6)
             }
 
-            dataset.push({organization, datasetName, dataFormats, numExcessResources})
+            datasets.push({organization, datasetName, dataFormats, numExcessResources})
         }
-        return dataset
+        return datasets
         }
         ''' 
     )
@@ -72,6 +72,9 @@ async def getData(page, maxElem, topic):
     numResults = int(header.split()[0])
     pgNum = 1
 
+    if maxElem == None: 
+        maxElem = numResults + 1
+
     while len(result) < maxElem and nextPageAvail: 
         
         result.extend(await readPage(page))
@@ -81,9 +84,7 @@ async def getData(page, maxElem, topic):
         nextPageURL = searchURL + "&page=" + str(pgNum)
         await page.goto(nextPageURL)
 
-        # check nextPageAvail 
-        print('lenResults: {}, numResults: {}'.format(len(result), numResults))
-        
+        # check nextPageAvail Bool
         nextPageAvail = (len(result) < numResults)
 
     print(result[:maxElem])
@@ -103,10 +104,11 @@ async def run(url, topic, maxElem):
 if __name__ == '__main__':  
     url = "https://www.data.gov/"
     loop = asyncio.get_event_loop()
-    maxElem = int(sys.argv[1])
+    topic = sys.argv[1]
+    maxElem = sys.argv[2] 
 
     if maxElem <= 0: 
         print('Max Elements must be greater than 1!')
          
     else:  
-        result = loop.run_until_complete(run(url, 'dicks', maxElem))
+        result = loop.run_until_complete(run(url, topic, maxElem))
