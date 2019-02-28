@@ -105,7 +105,7 @@ if __name__ == '__main__':
     url = "https://www.data.gov/"
     loop = asyncio.get_event_loop()
     topic = sys.argv[1]
-    maxElem = sys.argv[2] 
+    maxElem = int(sys.argv[2])
 
     if maxElem <= 0: 
         print('Max Elements must be greater than 1!')
