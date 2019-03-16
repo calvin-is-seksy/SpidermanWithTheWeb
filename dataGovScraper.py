@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Usage: 
+- topic: what you want to search for on data.gov 
+- maxElement: # of max elements you want back
+$ python dataGovScraper.py __topic__ __maxElement__
+"""
 
 import asyncio
 from pyppeteer import launch
